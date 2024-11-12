@@ -14,3 +14,7 @@ Automation system for bioinformatic pipelines
 7. Download options:
    - If the run size does not exceed the 5 Gbases limit, download it in fastq format.
    - If it exceeds the limit, download it using the SRA Toolkit.
+
+### Principal Architecture Design
+
+![image](https://github.com/user-attachments/assets/e343b7e4-9e71-4aa3-86ca-50d6b394ccbb)
