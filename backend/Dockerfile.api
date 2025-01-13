@@ -1,0 +1,40 @@
+FROM python:3.11-slim-buster
+
+ARG YOUR_ENV
+
+ENV YOUR_ENV=${YOUR_ENV} \
+    PYTHONFAULTHANDLER=1 \
+    PYTHONUNBUFFERED=1 \
+    PYTHONHASHSEED=random \
+    PIP_NO_CACHE_DIR=off \
+    PIP_DISABLE_PIP_VERSION_CHECK=on \
+    PIP_DEFAULT_TIMEOUT=100 \
+    POETRY_VERSION=1.6.1 \
+    # Register CA Bundle (used by requests package),
+    # see https://docs.python-requests.org/en/stable/user/advanced/#ssl-cert-verification
+    REQUESTS_CA_BUNDLE="/etc/ssl/certs/ca-certificates.crt"
+
+# ARG package_args="--allow-downgrades --allow-remove-essential --allow-change-held-packages --no-install-recommends"
+# RUN echo "debconf debconf/frontend select noninteractive" | debconf-set-selections \
+#     && export DEBIAN_FRONTEND=noninteractive \
+#     && apt-get -q $package_args update \
+#     && apt-get -y $package_args upgrade \
+#     && apt-get -y $package_args install \
+#     less \
+#     curl
+
+RUN pip install poetry==1.6.1
+
+# Creating folders, and files for a project:
+WORKDIR /opt/app
+COPY backend/api /opt/app/api
+COPY backend/src /opt/app/src
+COPY backend/pyproject.toml /opt/app/
+COPY backend/poetry.lock /opt/app/
+
+# Project initialization:
+ARG APP_VERSION
+RUN poetry config virtualenvs.create false \
+    && poetry config certificates.nexus_internal.cert $REQUESTS_CA_BUNDLE \
+    && poetry version $APP_VERSION \
+    && poetry install --no-interaction --no-ansi --no-cache --without dev
