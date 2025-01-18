@@ -15,11 +15,6 @@ class CreateSampleRequest(BaseModel):
     reference_name: str = Field(..., alias="referenceName")
 
 
-# class ValidateSamplesRequest(BaseModel):
-#     sample_names: conlist(str, min_length=1) = Field(..., "sampleNames")
-#     version: str
-
-
 @router.post("/samples", status_code=201, response_model=None)
 def create_sample(
     sample_data: CreateSampleRequest,
@@ -43,23 +38,6 @@ def get_sample(
     sample_service: SampleService = Depends(get_sample_service)
 ) -> Sample:
     return sample_service.get_sample(name)
-
-
-# @router.post("/samples/validate", status_code=200, response_model=None)
-# def validate_sample(
-#     body: ValidateSamplesRequest,
-#     sample_service: SampleService = Depends(get_sample_service)
-# ):
-#     ...
-    # return sample_service.get_sample(name)
-
-@router.get("/samples/{name}/metrics", status_code=200, response_model=SampleMetadata)
-def get_sample_metrics(
-    name: str,
-    sample_service: SampleService = Depends(get_sample_service)
-):
-    # return sample_service.get(name)
-    ...
 
 
 @router.post("/samples/{name}/molecular/mutations", status_code=200, response_model=None)

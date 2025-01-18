@@ -18,8 +18,10 @@ def try_float(v: any) -> Optional[float]:
     except ValueError:
         return None
 
+
 def _strround(v: float, ndigits: int) -> str:
     return str(round(v, ndigits))
+
 
 def get_diff(curval: Optional[str] = None, comval: Optional[str] = None, ndigits: int = 3, eps: float = 0.001) -> str:
     if curval is None and comval is None:

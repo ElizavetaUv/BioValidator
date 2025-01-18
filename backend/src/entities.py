@@ -28,6 +28,7 @@ class MetricCalculated(BaseModel):
 class Metric(MetricCalculated):
     model_config = ConfigDict(from_attributes=True)
 
+    sample_name: Optional[str] = Field(default=None, alias="sampleName")
     id: int
 
 

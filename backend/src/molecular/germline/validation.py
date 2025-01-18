@@ -5,7 +5,7 @@ import pandas as pd
 
 from src.entities import MetricCalculated, MetricName, MutationCalculated, Sample
 from src.molecular.base import ValidationInterface
-from src.molecular.helpers import recall
+from src.molecular.helpers import precision, recall
 
 
 def extract_mutations_key(mutations: List[MutationCalculated]) -> Set[Tuple[Hashable]]:
@@ -57,7 +57,7 @@ class GermlineValidation(ValidationInterface):
         false_positive = len(calculation_key.difference(reference_key))
         false_negative = len(reference_key.difference(calculation_key))
 
-        calculated_precision = recall(true_positive, false_positive)
+        calculated_precision = precision(true_positive, false_positive)
         calculated_recall = recall(true_positive, false_negative)
 
 

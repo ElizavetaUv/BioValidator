@@ -15,10 +15,10 @@ def intercept_get_one_errors(entity_name: str, value: any) -> Generator[None, No
             detail=f"Such {entity_name} with value: '{str(value)}' doesn't exist",
             status_code=404,
         ) from exc
-    except MultipleResultsFound:
+    except MultipleResultsFound as exc:
         raise BioValidatorExternalError(
             detail=f"Multiple values: {value} found for {entity_name}",
             status_code=409,
-        )
+        ) from exc
     except Exception as exc:
         raise exc

@@ -17,8 +17,7 @@ class ExceptionMiddleware(BaseHTTPMiddleware):
             )
         except Exception as err:
             logging.exception(err)
-            detail = f'Unexpected Error: {str(err)}'
-            # TODO: Think about security
+            detail = 'Unexpected Error'
             return Response(
                 detail,
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

@@ -1,4 +1,4 @@
-line-length = 120
+line-length = 130
 
 [lint]
 select = [
@@ -6,7 +6,6 @@ select = [
     "W",  # pycodestyle warnings
     "F",  # pyflakes
     "I",  # isort
-    "B",  # flake8-bugbear
     "C4",  # flake8-comprehensions
     "N",  # PEP8 naming convetions
 ]
