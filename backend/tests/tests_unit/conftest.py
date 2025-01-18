@@ -3,11 +3,18 @@ from pathlib import Path
 from typing import BinaryIO, List
 
 import pytest
+from dramatiq.brokers.stub import StubBroker
 from sqlalchemy import Engine, create_engine
 from sqlalchemy.orm import Session
 
 from src.db.models import Base
 from src.objstore.base import BaseStore
+
+
+@pytest.fixture(scope="session")
+def mock_dramatiq_broker() -> None:
+    broker = StubBroker()
+    broker.emit_after("process_boot")
 
 
 @pytest.fixture

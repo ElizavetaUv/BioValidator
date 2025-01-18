@@ -9,6 +9,7 @@ from api.routes.reference import router as reference_router
 from api.routes.sample import router as sample_router
 from src.logger import init_logger, logger
 
+# from src.worker.setup import setup_broker, close_broker
 
 def lifespan(app: FastAPI):
     # TODO: Add env var
@@ -20,6 +21,7 @@ def lifespan(app: FastAPI):
     yield
 
     logger.info("BioValidator have started to shutdown")
+    # close_broker()
     close_db_state(app)
 
 

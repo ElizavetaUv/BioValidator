@@ -1,12 +1,14 @@
 
 from typing import List
+from uuid import UUID
 
 from fastapi import APIRouter, Depends, UploadFile
 from pydantic import BaseModel
 
 from api.dependencies.services import get_reference_service
-from src.entities import MolecularType, Reference, ReferenceMetadata
+from src.entities import MolecularType, ReferenceMetadata
 from src.services.reference import ReferenceService
+from src.worker.helpers import Promise, TaskStatus
 
 router = APIRouter(tags=["Reference"])
 
@@ -40,15 +42,24 @@ def get_reference(
     return reference_service.get_reference(name)
 
 
-# TODO: Return promise id?
-@router.post("/references/{name}/calculate/mutations", status_code=200, response_model=None)
-def calculate_reference(
+@router.post("/references/{name}/calculate/mutations", status_code=200, response_model=Promise)
+def calculate_reference_mutations(
     file: UploadFile,
     name: str,
     reference_service: ReferenceService = Depends(get_reference_service),
-) -> Reference:
-    reference_service.calculate_mutations(
+) -> Promise:
+    return reference_service.calculate_mutations(
         molecular_type=MolecularType.GERMLINE,
         file_content=file.file,
         reference_name=name
+    )
+
+
+@router.get("/references/calculate/mutations/{task_id}/status", status_code=200, response_model=TaskStatus)
+def calculate_reference_mutations(
+    task_id: UUID,
+    reference_service: ReferenceService = Depends(get_reference_service),
+) -> TaskStatus:
+    return reference_service.get_calculate_mutations_status(
+        task_id=task_id
     )

@@ -49,5 +49,5 @@ class ReferenceRepository(BaseRepository):
             )
             for _, row in mutations_df.iterrows()
         ]
-        self.session.add_all(mutations)
+        self.session.bulk_save_objects(mutations)
         self.session.commit()

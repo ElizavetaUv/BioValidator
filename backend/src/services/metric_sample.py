@@ -1,13 +1,14 @@
 from typing import List, Optional
+from uuid import UUID
 
+import src.worker.tasks as tasks
 from src.db.repositories.metric import MetricRepository
 from src.db.repositories.sample import SampleRepository
 from src.entities import Metric, MetricCompared, MolecularType
 from src.errors import BioValidatorExternalError, BioValidatorInternalError
-from src.molecular.germline.prepare import parse_maf
-from src.molecular.germline.validation import GermlineValidation
 from src.objstore.base import BaseStore
-from src.objstore.samples import get_molecular_file_path
+from src.objstore.paths import get_sample_molecular_file_path
+from src.worker.helpers import Promise, TaskStatus, get_result
 
 
 def try_float(v: any) -> Optional[float]:
@@ -131,8 +132,8 @@ class MetricSampleService:
                 )
 
         for sample_name in sample_names:
-            current_metrics = self._metric_repository.filter(sample_name=sample_name, version=current_version)
-            compared_metrics = self._metric_repository.filter(sample_name=sample_name, version=compared_version)
+            current_metrics = self._metric_repository.filter(sample_names=[sample_name], version=current_version)
+            compared_metrics = self._metric_repository.filter(sample_names=[sample_name], version=compared_version)
 
             comparator = Comparator(
                 sample_name=sample_name,
@@ -145,7 +146,7 @@ class MetricSampleService:
 
         return metrics_compared
 
-    def validate(self, sample_names: List[str], version: str) -> None:
+    def validate(self, sample_names: List[str], version: str) -> Promise:
         for sample_name in sample_names:
             if not self._sample_repository.exists(sample_name):
                 raise BioValidatorExternalError(
@@ -159,23 +160,24 @@ class MetricSampleService:
                     status_code=400,
                 )
 
-            molecular_file_path = get_molecular_file_path(sample_name, MolecularType.GERMLINE)
+            molecular_file_path = get_sample_molecular_file_path(sample_name, MolecularType.GERMLINE)
 
             if not self._object_store.object_exists(molecular_file_path):
                 raise BioValidatorExternalError(
                     detail=f"Sample: '{sample_name}' has no mutations",
                     status_code=404,
                 )
-            raw_maf = self._object_store.download_object(molecular_file_path)
-            maf_df = parse_maf(raw_maf)
-            del raw_maf
 
-            validator = GermlineValidation(sample, version, maf_df)
-            metrics = validator.validate()
-            self._metric_repository.add_metrics(
-                sample_id=sample.id,
-                metrics=metrics,
-            )
+        task = tasks.calculate_metrics.send(
+            sample_names=sample_names,
+            version=version,
+        )
+        return Promise(
+            promiseId=task.message_id
+        )
 
-    def get_metrics(self, sample_name: Optional[str] = None, version: Optional[str] = None) -> List[Metric]:
-        return self._metric_repository.filter(sample_name=sample_name, version=version)
+    def get_validate_status(self, task_id: UUID) -> TaskStatus:
+        return get_result(tasks.calculate_metrics, task_id=task_id)
+
+    def get_metrics(self, sample_names: Optional[str] = None, version: Optional[str] = None) -> List[Metric]:
+        return self._metric_repository.filter(sample_names=sample_names, version=version)
