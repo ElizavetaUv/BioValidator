@@ -61,7 +61,7 @@ def calculate_metrics(
 def calculate_metrics(
     task_id: UUID,
     metric_sample_service: MetricSampleService = Depends(get_metric_sample_service)
-):
+) -> TaskStatus:
     return metric_sample_service.get_validate_status(
         task_id=task_id
     )

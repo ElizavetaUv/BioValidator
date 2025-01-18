@@ -35,6 +35,14 @@ class RabbitmqConfig(BaseSettings):
         url = f"amqp://{creds}@{location}/{self.RABBITMQ_VHOST}?heartbeat=30&blocked_connection_timeout=60"
         return url
 
+
+class WorkerConfig(BaseSettings):
+    model_config = SettingsConfigDict(extra="ignore", env_file=CONFIG_FILE)
+
+    WORKER_MEMCACHED_HOST: str
+    WORKER_MEMCACHED_PORT: str
+
+
 class ObjectStore(BaseSettings):
     model_config = SettingsConfigDict(extra="ignore", env_file=CONFIG_FILE)
 
@@ -47,7 +55,10 @@ class ObjectStore(BaseSettings):
 class Config(BaseSettings):
     model_config = SettingsConfigDict(extra="ignore", env_file=CONFIG_FILE)
 
+    LOG_LEVEL: str = Field(default="DEBUG")
+
     postgres: PostgresConfig = Field(default_factory=PostgresConfig)
+    worker: WorkerConfig = Field(default_factory=WorkerConfig)
     rabbitmq: RabbitmqConfig = Field(default_factory=RabbitmqConfig)
     object_store: ObjectStore = Field(default_factory=ObjectStore)
 

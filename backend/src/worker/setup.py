@@ -33,7 +33,8 @@ def setup_broker() -> None:
     config = get_config()
     broker = RabbitmqBroker(url=config.rabbitmq.get_amqp_uri())
 
-    backend=MemcachedBackend(servers=["memcached:11211"], binary=True)
+    memcached_server = f"{config.worker.WORKER_MEMCACHED_HOST}:{config.worker.WORKER_MEMCACHED_PORT}"
+    backend=MemcachedBackend(servers=[memcached_server], binary=True)
     broker.add_middleware(Results(backend=backend))
 
     dramatiq.set_broker(broker)

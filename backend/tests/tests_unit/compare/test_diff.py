@@ -2,9 +2,6 @@ import pytest
 
 from src.errors import BioValidatorInternalError
 
-# Assuming the functions are in a module named `diff_module`
-from src.services.metric_sample import _strround, get_diff, try_float
-
 
 # Test for try_float
 @pytest.mark.parametrize(
@@ -19,6 +16,7 @@ from src.services.metric_sample import _strround, get_diff, try_float
     ]
 )
 def test_try_float(input_value, expected):
+    from src.services.metric_sample import try_float
     assert try_float(input_value) == expected
 
 # Test for _strround
@@ -31,6 +29,7 @@ def test_try_float(input_value, expected):
     ]
 )
 def test_strround(value, ndigits, expected):
+    from src.services.metric_sample import _strround
     assert _strround(value, ndigits) == expected
 
 # Test for get_diff
@@ -73,7 +72,8 @@ def test_strround(value, ndigits, expected):
         ("invalid", None, 3, 0.001, "invalid (deleted)"),
     ]
 )
-def test_get_diff(curval, comval, ndigits, eps, expected):
+def test_get_diff(curval, comval, ndigits, eps, expected, mock_dramatiq_broker):
+    from src.services.metric_sample import get_diff
     if isinstance(expected, str):
         assert get_diff(curval, comval, ndigits, eps) == expected
     else:

@@ -17,7 +17,7 @@ worker_global.set(ENGINE_KEY, engine)
 worker_global.set(SESSIONMAKER_KEY, sessionmaker)
 worker_global.set(OBJECT_STORE_KEY, object_store)
 
-init_logger("DEBUG")
+init_logger(config.LOG_LEVEL)
 
 setup_broker()
 

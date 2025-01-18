@@ -1,11 +1,10 @@
 import pytest
 
-from src.db.repositories.reference import ReferenceRepository
-from src.errors import BioValidatorExternalError
-from src.services.reference import ReferenceService
-
 
 def test_create_reference(mock_session, mock_object_store) -> None:
+    from src.db.repositories.reference import ReferenceRepository
+    from src.services.reference import ReferenceService
+
     reference_repo = ReferenceRepository(
         session=mock_session
     )
@@ -21,6 +20,10 @@ def test_create_reference(mock_session, mock_object_store) -> None:
 
 
 def test_create_reference_several_times(mock_session, mock_object_store) -> None:
+    from src.db.repositories.reference import ReferenceRepository
+    from src.errors import BioValidatorExternalError
+    from src.services.reference import ReferenceService
+
     reference_repo = ReferenceRepository(
         session=mock_session
     )
@@ -35,6 +38,9 @@ def test_create_reference_several_times(mock_session, mock_object_store) -> None
 
 
 def test_get_empty_references(mock_session, mock_object_store) -> None:
+    from src.db.repositories.reference import ReferenceRepository
+    from src.services.reference import ReferenceService
+
     reference_repo = ReferenceRepository(
         session=mock_session
     )
@@ -48,6 +54,10 @@ def test_get_empty_references(mock_session, mock_object_store) -> None:
 
 
 def test_get_unexist_reference(mock_session, mock_object_store) -> None:
+    from src.db.repositories.reference import ReferenceRepository
+    from src.errors import BioValidatorExternalError
+    from src.services.reference import ReferenceService
+
     reference_repo = ReferenceRepository(
         session=mock_session
     )
@@ -60,6 +70,9 @@ def test_get_unexist_reference(mock_session, mock_object_store) -> None:
 
 
 def test_get_references_with_exist_entities(mock_session, mock_object_store) -> None:
+    from src.db.repositories.reference import ReferenceRepository
+    from src.services.reference import ReferenceService
+
     reference_repo = ReferenceRepository(
         session=mock_session
     )
