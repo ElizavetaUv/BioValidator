@@ -10,7 +10,7 @@ Base = declarative_base()
 class Mutation(Base):
     __tablename__ = "mutations"
     __table_args__ = (
-        # UniqueConstraint("hugo_symbol", "variant_type", "reference_allele"),
+        UniqueConstraint("hugo_symbol", "variant_type", "reference_allele"),
         {"schema": "main"},
     )
 
@@ -22,7 +22,6 @@ class Mutation(Base):
     hugo_symbol = Column(Text, nullable=False)
     variant_type = Column(Text, nullable=False)
     reference_allele = Column(Text, nullable=False)
-    # allele = Column(Text, nullable=False)
     chromosome = Column(Integer, nullable=True)
     start_position = Column(Integer, nullable=True)
     end_position = Column(Integer, nullable=True)

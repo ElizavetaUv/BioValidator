@@ -1,10 +1,7 @@
-# from pathlib import Path
 from io import BytesIO
 from typing import BinaryIO
 
 import pandas as pd
-
-# USE_GENE_STORAGE = CONFIG["common"]["use_gene_storage"]
 
 
 def validate_maf(
@@ -22,16 +19,6 @@ def parse_maf(
 
     maf_df = pd.read_csv(content, sep="\t", comment="#", low_memory=False)
     validate_maf(maf_df)
-    # add hg38 or another version
-
-    # if USE_GENE_STORAGE and "Hugo_Symbol" in data:
-    #     gene_storage_requester = GeneStorageRequester(GENE_STORAGE_HOST)
-    #     genes = gene_storage_requester.get_genes(set(data["Hugo_Symbol"]))
-    #     data["Hugo_Symbol"] = data["Hugo_Symbol"].apply(
-    #         lambda x: genes[x].name
-    #         if x in genes.keys() and genes[x].name != genes[x].nameQuery
-    #         else x
-    #     )
 
     snp = maf_df.loc[maf_df["Variant_Type"].isin(["SNP", "TNP", "DNP", "ONP"])]
 
@@ -59,11 +46,3 @@ def extract_glued_alterations_as_snp(maf_df: pd.DataFrame) -> pd.DataFrame:
             snp_data["Variant_Type"] = "SNP"
             result.append(snp_data)
     return pd.DataFrame(result)
-
-
-def validate_mutations(content: bytes) -> None:
-    ...
-
-
-def calculate_mutations() -> None:
-    ...

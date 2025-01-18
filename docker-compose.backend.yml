@@ -11,6 +11,29 @@ services:
     networks:
       - backend
 
+  rabbitmq:
+    container_name: rabbitmq
+    hostname: rabbitmq
+    image: rabbitmq:3.13.7-management
+    ports:
+      - "${RABBITMQ_AMQP_PORT}:${RABBITMQ_AMQP_PORT}"
+      - "${RABBITMQ_HTTP_PORT}:${RABBITMQ_HTTP_PORT}"
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+      RABBITMQ_DEFAULT_VHOST: ${RABBITMQ_VHOST}
+    volumes:
+      - ./rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
+    networks:
+      - backend
+
+  memcached:
+    image: memcached
+    ports:
+      - "11211:11211"
+    networks:
+      - backend
+
   minio:
     container_name: minio
     image: quay.io/minio/minio:RELEASE.2023-11-15T20-43-25Z
@@ -50,11 +73,31 @@ services:
     command: gunicorn -k uvicorn.workers.UvicornWorker -w 4 -b ":${API_PORT}" api.main:app --limit-request-line 0
     depends_on:
       - postgres-db
+      - rabbitmq
       - minio
       - migrator
     volumes:
       - ./backend/src:/opt/app/src
       - ./backend/api:/opt/app/api
+    networks:
+      - backend
+
+  worker:
+    container_name: worker
+    env_file:
+      - .env-dev
+      - .env
+    build:
+      context: .
+      dockerfile: backend/Dockerfile.worker
+    command: ["dramatiq", "-p", "8", "-t", "4", "src.worker.main"]
+    depends_on:
+      - postgres-db
+      - rabbitmq
+      - minio
+      - migrator
+    volumes:
+      - ./backend/src:/opt/app/src
     networks:
       - backend
 

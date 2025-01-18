@@ -1,69 +1,61 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import { Box, Button, Typography, Stack, TableContainer } from "@mui/material";
+import ThemeProviderWrapper from "./components/ThemeProviderWrapper";
+import MetricsTable from "./components/MetricsTable";
+import CompareMetricsTable from "./components/CompareMetricsTable";
+import SampleList from "./components/SampleList";
+import PipelinesVersionSelector from "./components/PipelinesVersionSelector";
+import ComparePipelineVersion from "./components/ComparePipelinesVersion";
 import {
-  Box,
-  Button,
-  Checkbox,
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Select,
-  Typography,
-  Stack,
-  createTheme,
-  ThemeProvider,
-} from "@mui/material";
-
-const theme = createTheme({
-  palette: {
-    primary: {
-      main: "#4B61EC",
-    },
-  },
-  typography: {
-    allVariants: {
-      color: "#060D3A",
-    },
-  },
-});
-
-const API_PATH = "http://localhost:8083";
+  getMetrics,
+  getSamples,
+  compareMetricsAPI,
+  startValidation,
+  checkValidationStatus,
+} from "./api";
 
 const App = () => {
   const [samples, setSamples] = useState([]);
   const [metrics, setMetrics] = useState([]);
-  const pipelineVersions = ["1.0", "2.0", "3.0"];
 
   const [selectedSamples, setSelectedSamples] = useState([]);
   const [pipelineVersion, setPipelineVersion] = useState("");
   const [pipelineVersionToCompare, setPipelineVersionToCompare] = useState("");
+  const [compareMetrics, setCompareMetrics] = useState(false);
+  const [validationPromiseId, setValidationPromiseId] = useState(null);
+  const compareMetricsRef = useRef(compareMetrics);
 
   useEffect(() => {
-    fetch(`${API_PATH}/samples`, {
-      method: "GET",
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        console.log("Samples:", data);
-        setSamples(data);
-      })
-      .catch((error) => console.error("Error fetching samples:", error));
+    compareMetricsRef.current = compareMetrics;
+  }, [compareMetrics]);
+
+  useEffect(() => {
+    getSamples().then((data) => setSamples(data));
   }, []);
 
-  const samplesDump = Array.from({ length: 50 }, (_, i) => `Sample ${i + 1}`);
-  const metricsDump = Array.from({ length: 50 }, (_, i) => `Metric ${i + 1}`);
-  const metricsDumpData = [
-    { name: "TP", version: "1.0", value: "4", sample_id: "NA127" },
-    { name: "TF", version: "1.0", value: "32", sample_id: "NA127" },
-    { name: "FN", version: "1.0", value: "67", sample_id: "NA127" },
-    { name: "TP", version: "1.0", value: "3", sample_id: "NA127" },
-    { name: "FN", version: "1.0", value: "87", sample_id: "NA127" },
-    { name: "TP", version: "1.0", value: "9", sample_id: "NA127" },
-    { name: "FN", version: "1.0", value: "35", sample_id: "NA127" },
+  useEffect(() => {
+    if (
+      !pipelineVersion ||
+      selectedSamples.length === 0 ||
+      compareMetricsRef.current
+    )
+      return;
 
-    {},
-  ];
+    const fetchMetrics = () => {
+      if (compareMetricsRef.current) return;
+
+      getMetrics(pipelineVersion, selectedSamples).then((data) =>
+        setMetrics(data)
+      );
+    };
+
+    const intervalId = setInterval(fetchMetrics, 1000);
+
+    return () => clearInterval(intervalId);
+  }, [pipelineVersion, selectedSamples]);
 
   const handleSampleChange = (sample) => {
+    if (compareMetrics) setCompareMetrics(false);
     setSelectedSamples((prev) =>
       prev.includes(sample)
         ? prev.filter((s) => s !== sample)
@@ -77,47 +69,39 @@ const App = () => {
       version: pipelineVersion,
     };
 
-    fetch(`${API_PATH}/metrics/calculate`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(requestBody),
-    })
-      .then((response) => {
-        if (response.ok) {
-          alert("Validation started successfully!");
-        } else {
-          throw new Error("Validation failed");
-        }
-      })
-      .catch((error) => alert(`Error starting validation: ${error.message}`));
+    const checkValidationStatus_ = (promiseId) => {
+      setTimeout(() => {
+        checkValidationStatus(promiseId).then((data) => {
+          if (data["status"] == "PROGRESS") {
+            console.log("Metrics are calculating");
+            checkValidationStatus_(promiseId);
+          } else if (data["status"] == "FAILURE") {
+            alert(`Error while calculating metrics: ${data["details"]}`);
+          } else {
+            alert("Metrics calculation completed");
+          }
+        });
+      }, 5000);
+    };
+
+    startValidation(requestBody).then((promiseId) => {
+      checkValidationStatus_(promiseId);
+    });
   };
 
   const handleCompareMetrics = () => {
+    setCompareMetrics(true);
     const requestBody = {
       sampleNames: selectedSamples,
       currentVersion: pipelineVersion,
       comparedVersion: pipelineVersionToCompare,
     };
 
-    fetch(`${API_PATH}/metrics/compare`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(requestBody),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        console.log("Comparison result:", data);
-        setMetrics(data);
-      })
-      .catch((error) => alert(`Error comparing metrics: ${error.message}`));
+    compareMetricsAPI(requestBody).then((data) => setMetrics(data));
   };
 
   return (
-    <ThemeProvider theme={theme}>
+    <ThemeProviderWrapper>
       <Box
         p={4}
         display="flex"
@@ -135,52 +119,18 @@ const App = () => {
               Samples for validation
             </Typography>
 
-            <Box
-              border={1}
-              borderColor="grey.300"
-              borderRadius={2}
-              p={2}
-              overflow="auto"
-              sx={{ maxHeight: "calc(90vh - 250px)" }}
-            >
-              {samplesDump.map((sample) => (
-                <Box
-                  key={sample}
-                  display="flex"
-                  alignItems="center"
-                  sx={{ height: 50 }}
-                >
-                  <Checkbox
-                    checked={selectedSamples.includes(sample)}
-                    onChange={() => handleSampleChange(sample)}
-                  />
-                  <Typography variant="h6">{sample}</Typography>
-                </Box>
-              ))}
-            </Box>
+            <SampleList
+              samples={samples}
+              selectedSamples={selectedSamples}
+              handleSampleChange={handleSampleChange}
+            />
 
-            <FormControl fullWidth>
-              <InputLabel id="PipelineVersion" sx={{ fontSize: "1.2rem" }}>
-                Pipeline version
-              </InputLabel>
-              <Select
-                value={pipelineVersion}
-                onChange={(e) => setPipelineVersion(e.target.value)}
-                sx={{ height: 50, fontSize: "1.2rem" }}
-                labelId="PipelineVersion"
-                label="Pipeline version"
-              >
-                {pipelineVersions.map((pipelineVersion) => (
-                  <MenuItem
-                    key={pipelineVersion}
-                    value={pipelineVersion}
-                    sx={{ fontSize: "1.2rem" }}
-                  >
-                    {pipelineVersion}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+            <PipelinesVersionSelector
+              value={pipelineVersion}
+              onChange={setPipelineVersion}
+              pipelineVersions={["1", "2", "3"]}
+              label="Pipeline version"
+            />
 
             <Button
               variant="contained"
@@ -198,65 +148,32 @@ const App = () => {
               Metrics
             </Typography>
 
-            <Box
-              border={1}
-              borderColor="grey.300"
-              borderRadius={2}
-              p={2}
+            <TableContainer
               overflow="auto"
-              sx={{ maxHeight: "calc(90vh - 250px)" }}
+              sx={{
+                border: "1px solid #e0e0e0",
+                borderRadius: "8px",
+                height: "calc(90vh - 250px)",
+              }}
             >
-              {metricsDump.map((metric) => (
-                <Box
-                  key={metric}
-                  display="flex"
-                  alignItems="center"
-                  sx={{ height: 50 }}
-                >
-                  <Typography variant="h6">{metric}</Typography>
-                </Box>
-              ))}
-            </Box>
+              {compareMetrics ? (
+                <CompareMetricsTable metrics={metrics} />
+              ) : (
+                <MetricsTable metrics={metrics} />
+              )}
+            </TableContainer>
+            {/* </Box> */}
 
-            <FormControl fullWidth>
-              <InputLabel
-                id="PipelineVersionCompare"
-                sx={{ fontSize: "1.2rem" }}
-              >
-                Pipeline version to compare
-              </InputLabel>
-              <Select
-                value={pipelineVersionToCompare}
-                onChange={(e) => setPipelineVersionToCompare(e.target.value)}
-                sx={{ height: 50, fontSize: "1.2rem" }}
-                labelId="PipelineVersionCompare"
-                label="Pipeline version to compare"
-              >
-                {pipelineVersions.map((pipelineVersion) => (
-                  <MenuItem
-                    key={pipelineVersion}
-                    value={pipelineVersion}
-                    sx={{ fontSize: "1.2rem" }}
-                  >
-                    {pipelineVersion}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-
-            <Button
-              variant="contained"
-              color="primary"
-              sx={{ height: 50, fontSize: "1.2rem" }}
-              fullWidth
-              onClick={handleCompareMetrics}
-            >
-              Compare
-            </Button>
+            <ComparePipelineVersion
+              pipelineVersionToCompare={pipelineVersionToCompare}
+              pipelineVersions={["1", "2", "3"]}
+              setPipelineVersionToCompare={setPipelineVersionToCompare}
+              handleCompareMetrics={handleCompareMetrics}
+            />
           </Stack>
         </Box>
       </Box>
-    </ThemeProvider>
+    </ThemeProviderWrapper>
   );
 };
 

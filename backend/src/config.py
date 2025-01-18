@@ -18,6 +18,31 @@ class PostgresConfig(BaseSettings):
     POSTGRES_PORT: str = Field(default="5432")
 
 
+class RabbitmqConfig(BaseSettings):
+    model_config = SettingsConfigDict(extra="ignore", env_file=CONFIG_FILE)
+
+    RABBITMQ_AMQP_PORT: str = Field(default="5672")
+    RABBITMQ_HTTP_PORT: str = Field(default="15672")
+
+    RABBITMQ_HOST: str
+    RABBITMQ_PASSWORD: SecretStr
+    RABBITMQ_USER: str
+    RABBITMQ_VHOST: str
+
+    def get_amqp_uri(self) -> str:
+        creds = f"{self.RABBITMQ_USER}:{self.RABBITMQ_PASSWORD.get_secret_value()}"
+        location = f"{self.RABBITMQ_HOST}:{self.RABBITMQ_AMQP_PORT}"
+        url = f"amqp://{creds}@{location}/{self.RABBITMQ_VHOST}?heartbeat=30&blocked_connection_timeout=60"
+        return url
+
+
+class WorkerConfig(BaseSettings):
+    model_config = SettingsConfigDict(extra="ignore", env_file=CONFIG_FILE)
+
+    WORKER_MEMCACHED_HOST: str
+    WORKER_MEMCACHED_PORT: str
+
+
 class ObjectStore(BaseSettings):
     model_config = SettingsConfigDict(extra="ignore", env_file=CONFIG_FILE)
 
@@ -27,16 +52,15 @@ class ObjectStore(BaseSettings):
     CUSTOM_S3_URL: str | None = Field(default=None)
 
 
-class ReferenceDataConfig(BaseSettings):
-    reference_dir: str = '../data/test_maf_output'
-
-
 class Config(BaseSettings):
     model_config = SettingsConfigDict(extra="ignore", env_file=CONFIG_FILE)
 
+    LOG_LEVEL: str = Field(default="DEBUG")
+
     postgres: PostgresConfig = Field(default_factory=PostgresConfig)
+    worker: WorkerConfig = Field(default_factory=WorkerConfig)
+    rabbitmq: RabbitmqConfig = Field(default_factory=RabbitmqConfig)
     object_store: ObjectStore = Field(default_factory=ObjectStore)
-    reference_data: ReferenceDataConfig = Field(default_factory=ReferenceDataConfig)
 
 
 def get_config() -> Config:

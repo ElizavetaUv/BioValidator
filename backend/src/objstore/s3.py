@@ -42,7 +42,7 @@ class S3Store(BaseStore):
             if err.response["Error"]["Code"] == "404":
                 self._bucket = self._s3_resource.create_bucket(Bucket=self._bucket_name)
             else:
-                raise BioValidatorInternalError(f"{str(err)}")
+                raise BioValidatorInternalError(f"{str(err)}") from err
 
     def object_exists(self, path: str) -> bool:
         s3_object = self._bucket.Object(str(path))
@@ -61,7 +61,6 @@ class S3Store(BaseStore):
             raise BioValidatorInternalError(
                 f"Object with key {path} could not be put in store, code: {response['ResponseMetadata']['HTTPStatusCode']}"
             )
-        # self._s3_client.put_object(Body=content, Bucket=self._bucket_name, Key=path)
 
     def download_object(self, path: str) -> None | bytes:
         if not self.object_exists(path):
@@ -74,7 +73,6 @@ class S3Store(BaseStore):
     def list_objects(
         self, path: str
     ) -> List[str]:
-        objects
         objects = self._s3_resource.list_objects_v2(Bucket=self._bucket_name, Prefix=path)
         object_keys = [obj["Key"] for obj in objects["Contents"]]
         return object_keys

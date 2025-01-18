@@ -4,8 +4,8 @@ from src.db.repositories.reference import ReferenceRepository
 from src.db.repositories.sample import SampleRepository
 from src.entities import MolecularType, Sample, SampleMetadata
 from src.errors import BioValidatorExternalError
+from src.objstore.paths import get_sample_molecular_file_path
 from src.objstore.s3 import S3Store
-from src.objstore.samples import get_molecular_file_path
 
 
 class SampleService:
@@ -57,7 +57,7 @@ class SampleService:
         # TODO: Add maf validation
         self._object_store.upload_object(
             content=file_content,
-            path=get_molecular_file_path(
+            path=get_sample_molecular_file_path(
                 sample_name,
                 molecular_type
             )

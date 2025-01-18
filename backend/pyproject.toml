@@ -17,6 +17,8 @@ boto3 = "^1.35.92"
 uvicorn = "^0.34.0"
 gunicorn = "^23.0.0"
 python-multipart = "^0.0.20"
+dramatiq = {extras = ["memcached", "rabbitmq"], version = "^1.17.1"}
+pika = "^1.3.2"
 
 
 [tool.poetry.group.dev.dependencies]

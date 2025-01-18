@@ -1,7 +1,10 @@
-data/*
+*data/*
 .env
 .vscode/*
 .ruff_check/*
+
+# Internal
+TODO.md
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

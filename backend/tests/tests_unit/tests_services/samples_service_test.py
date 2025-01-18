@@ -1,14 +1,10 @@
 import pytest
 
-from src.db.repositories.reference import ReferenceRepository
-from src.db.repositories.sample import SampleRepository
-from src.errors import BioValidatorExternalError
-from src.services.reference import ReferenceService
-from src.services.sample import SampleService
-
 
 @pytest.fixture
 def create_mock_reference_1(mock_session, mock_object_store):
+    from src.db.repositories.reference import ReferenceRepository
+    from src.services.reference import ReferenceService
     reference_repo = ReferenceRepository(
         session=mock_session
     )
@@ -22,6 +18,10 @@ def create_mock_reference_1(mock_session, mock_object_store):
 
 
 def test_create_sample(mock_session, mock_object_store, create_mock_reference_1) -> None:
+    from src.db.repositories.reference import ReferenceRepository
+    from src.db.repositories.sample import SampleRepository
+    from src.services.sample import SampleService
+
     reference_repo = ReferenceRepository(
         session=mock_session
     )
@@ -41,6 +41,11 @@ def test_create_sample(mock_session, mock_object_store, create_mock_reference_1)
 
 
 def test_create_sample_with_unexist_reference(mock_session, mock_object_store, create_mock_reference_1) -> None:
+    from src.db.repositories.reference import ReferenceRepository
+    from src.db.repositories.sample import SampleRepository
+    from src.errors import BioValidatorExternalError
+    from src.services.sample import SampleService
+
     reference_repo = ReferenceRepository(
         session=mock_session
     )
@@ -58,6 +63,11 @@ def test_create_sample_with_unexist_reference(mock_session, mock_object_store, c
 
 
 def test_create_sample_several_times(mock_session, mock_object_store, create_mock_reference_1) -> None:
+    from src.db.repositories.reference import ReferenceRepository
+    from src.db.repositories.sample import SampleRepository
+    from src.errors import BioValidatorExternalError
+    from src.services.sample import SampleService
+
     reference_repo = ReferenceRepository(
         session=mock_session
     )
@@ -76,6 +86,10 @@ def test_create_sample_several_times(mock_session, mock_object_store, create_moc
 
 
 def test_get_empty_sample(mock_session, mock_object_store) -> None:
+    from src.db.repositories.reference import ReferenceRepository
+    from src.db.repositories.sample import SampleRepository
+    from src.services.sample import SampleService
+
     reference_repo = ReferenceRepository(
         session=mock_session
     )
@@ -93,6 +107,11 @@ def test_get_empty_sample(mock_session, mock_object_store) -> None:
 
 
 def test_get_unexist_sample(mock_session, mock_object_store) -> None:
+    from src.db.repositories.reference import ReferenceRepository
+    from src.db.repositories.sample import SampleRepository
+    from src.errors import BioValidatorExternalError
+    from src.services.sample import SampleService
+
     reference_repo = ReferenceRepository(
         session=mock_session
     )
@@ -109,6 +128,10 @@ def test_get_unexist_sample(mock_session, mock_object_store) -> None:
 
 
 def test_get_references_with_exist_entities(mock_session, mock_object_store, create_mock_reference_1) -> None:
+    from src.db.repositories.reference import ReferenceRepository
+    from src.db.repositories.sample import SampleRepository
+    from src.services.sample import SampleService
+
     reference_repo = ReferenceRepository(
         session=mock_session
     )

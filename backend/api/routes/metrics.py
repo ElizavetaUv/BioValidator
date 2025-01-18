@@ -1,4 +1,5 @@
 from typing import List, Optional
+from uuid import UUID
 
 from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel, Field, conlist
@@ -6,6 +7,7 @@ from pydantic import BaseModel, Field, conlist
 from api.dependencies.services import get_metric_sample_service
 from src.entities import Metric, MetricCompared
 from src.services.metric_sample import MetricSampleService
+from src.worker.helpers import Promise, TaskStatus
 
 router = APIRouter(tags=["Metric"])
 
@@ -23,12 +25,12 @@ class CompareMetrics(BaseModel):
 @router.get("/metrics", status_code=200, response_model=List[Metric])
 def get_metrics(
     version: Optional[str] = Query(default=None),
-    sample_name: Optional[str] = Query(default=None, alias="sampleName"),
+    sample_names: Optional[List[str]] = Query(default=None, alias="sampleName"),
     metric_sample_service: MetricSampleService = Depends(get_metric_sample_service),
 ) -> List[Metric]:
     return metric_sample_service.get_metrics(
         version=version,
-        sample_name=sample_name,
+        sample_names=sample_names,
     )
 
 
@@ -44,12 +46,22 @@ def compare_versions(
     )
 
 
-@router.post("/metrics/calculate", status_code=200, response_model=None)
+@router.post("/metrics/calculate", status_code=200, response_model=Promise)
 def calculate_metrics(
     body: ValidateSamplesRequest,
     metric_sample_service: MetricSampleService = Depends(get_metric_sample_service)
-):
-    metric_sample_service.validate(
+) -> Promise:
+    return metric_sample_service.validate(
         sample_names=body.sample_names,
         version=body.version,
+    )
+
+
+@router.get("/metrics/{task_id}/calculate/status", status_code=200, response_model=TaskStatus)
+def calculate_metrics(
+    task_id: UUID,
+    metric_sample_service: MetricSampleService = Depends(get_metric_sample_service)
+) -> TaskStatus:
+    return metric_sample_service.get_validate_status(
+        task_id=task_id
     )

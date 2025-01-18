@@ -1,7 +1,7 @@
 [tool.poetry]
-name = "scripts"
+name = "tools"
 version = "0.1.0"
-description = "BioValidator scripts"
+description = "BioValidator tools"
 authors = ["Elizaveta Uvarova <“Elizaveta.Uvarova@bostongene.com”>"]
 readme = "README.md"
 

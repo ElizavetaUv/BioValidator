@@ -7,12 +7,13 @@ from api.middlewares import ExceptionMiddleware
 from api.routes.metrics import router as metric_router
 from api.routes.reference import router as reference_router
 from api.routes.sample import router as sample_router
+from src.config import get_config
 from src.logger import init_logger, logger
 
 
 def lifespan(app: FastAPI):
-    # TODO: Add env var
-    init_logger("DEBUG")
+    config = get_config()
+    init_logger(config.LOG_LEVEL)
 
     logger.info("BioValidator have been starting up")
     create_db_state(app)
@@ -25,7 +26,7 @@ def lifespan(app: FastAPI):
 
 app = FastAPI(
     title='BioValidator API',
-    description='...', # TODO: Add info
+    description='BioValidator API',
     docs_url='/docs',
     openapi_url='/openapi.json',
     lifespan=lifespan,
@@ -46,5 +47,4 @@ app.include_router(metric_router)
 
 
 if __name__ == '__main__':
-    # TODO: Add api envs
     uvicorn.run(app, host='0.0.0.0', port=8000)
