@@ -26,7 +26,7 @@ const CompareMetricsTable = ({ metrics }) => {
           currentVersion,
           comparedVersion,
           "tp-genes": null,
-          "tn-genes": null,
+          "fn-genes": null,
           "fp-genes": null,
           "precision-gene": null,
           "recall-gene": null,
@@ -59,7 +59,7 @@ const CompareMetricsTable = ({ metrics }) => {
           <TableCell>Current version</TableCell>
           <TableCell>Compare version</TableCell>
           <TableCell>True Positive variants</TableCell>
-          <TableCell>True Negative variants</TableCell>
+          <TableCell>False Negative variants</TableCell>
           <TableCell>False Positive variants</TableCell>
           <TableCell>Precision</TableCell>
           <TableCell>Recall</TableCell>
@@ -76,20 +76,27 @@ const CompareMetricsTable = ({ metrics }) => {
               {row["tp-genes"]?.diffValue || "unchanged"})
             </TableCell>
             <TableCell>
-              {row["tn-genes"]?.currentValue || 0} (
-              {row["tn-genes"]?.diffValue || "unchanged"})
+              {row["fn-genes"]?.currentValue || 0} (
+              {row["fn-genes"]?.diffValue || "unchanged"})
             </TableCell>
             <TableCell>
               {row["fp-genes"]?.currentValue || 0} (
               {row["fp-genes"]?.diffValue || "unchanged"})
             </TableCell>
             <TableCell>
-              {row["precision-gene"]?.currentValue || "N/A"} (
-              {row["precision-gene"]?.diffValue || "unchanged"})
+              {parseFloat(row["precision-gene"]?.currentValue).toFixed(7) ||
+                "N/A"}{" "}
+              (
+              {parseFloat(row["precision-gene"]?.diffValue).toFixed(7) ||
+                "unchanged"}
+              )
             </TableCell>
             <TableCell>
-              {row["recall-gene"]?.currentValue || "N/A"} (
-              {row["recall-gene"]?.diffValue || "unchanged"})
+              {parseFloat(row["recall-gene"]?.currentValue).toFixed(7) || "N/A"}{" "}
+              (
+              {parseFloat(row["recall-gene"]?.diffValue).toFixed(7) ||
+                "unchanged"}
+              )
             </TableCell>
           </TableRow>
         ))}

@@ -5,9 +5,6 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 CONFIG_FILE = os.getenv("CONFIG_FILE", ".env-dev")
 
-# _ENV_DEV_PATH = os.path.join(os.path.dirname(__file__), ".env-dev")
-# _ENV_PATH = os.path.join(os.path.dirname(__file__), ".env")
-
 class PostgresConfig(BaseSettings):
     model_config = SettingsConfigDict(extra="ignore", env_file=CONFIG_FILE)
 

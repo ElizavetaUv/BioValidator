@@ -1,3 +1,5 @@
+import { enqueueSnackbar } from "notistack";
+
 const API_PATH = "http://localhost:8083";
 
 export const getMetrics = (pipelineVersion, selectedSamples) => {
@@ -43,7 +45,11 @@ export const compareMetricsAPI = (requestBody) => {
       console.log("Comparison result:", data);
       return data;
     })
-    .catch((error) => alert(`Error comparing metrics: ${error.message}`));
+    .catch((error) =>
+      enqueueSnackbar(`Error comparing metrics: ${error.message}`, {
+        variant: "error",
+      })
+    );
 };
 
 export const startValidation = (requestBody) => {
@@ -56,14 +62,20 @@ export const startValidation = (requestBody) => {
   })
     .then((response) => {
       if (response.ok) {
-        alert("Validation started successfully!");
+        enqueueSnackbar("Validation started successfully!", {
+          variant: "info",
+        });
         return response.json();
       } else {
         throw new Error("Validation failed");
       }
     })
     .then((data) => data["promiseId"])
-    .catch((error) => alert(`Error starting validation: ${error.message}`));
+    .catch((error) =>
+      enqueueSnackbar(`Error starting validation: ${error.message}`, {
+        variant: "error",
+      })
+    );
 };
 
 export const checkValidationStatus = (promiseId) => {

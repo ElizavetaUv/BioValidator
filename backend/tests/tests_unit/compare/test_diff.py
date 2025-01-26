@@ -3,7 +3,6 @@ import pytest
 from src.errors import BioValidatorInternalError
 
 
-# Test for try_float
 @pytest.mark.parametrize(
     "input_value, expected",
     [
@@ -19,7 +18,6 @@ def test_try_float(input_value, expected):
     from src.services.metric_sample import try_float
     assert try_float(input_value) == expected
 
-# Test for _strround
 @pytest.mark.parametrize(
     "value, ndigits, expected",
     [
@@ -32,7 +30,6 @@ def test_strround(value, ndigits, expected):
     from src.services.metric_sample import _strround
     assert _strround(value, ndigits) == expected
 
-# Test for get_diff
 @pytest.mark.parametrize(
     "curval, comval, ndigits, eps, expected",
     [
