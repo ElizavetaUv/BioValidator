@@ -2,6 +2,9 @@
 .env
 .vscode/*
 .ruff_check/*
+s3_emulator
+data
+.research
 
 # Internal
 TODO.md
@@ -38,21 +41,3 @@ pip-delete-this-directory.txt
 .cache
 nosetests.xml
 coverage.xml
-
-# Translations
-*.mo
-
-# Mr Developer
-.mr.developer.cfg
-.project
-.pydevproject
-
-# Rope
-.ropeproject
-
-# Django stuff:
-*.log
-*.pot
-
-# Sphinx documentation
-docs/_build/

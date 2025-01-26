@@ -25,7 +25,7 @@ class WorkerGlobal(Generic[T]):
         return cls._instance
     def set(self, name: str, entity: T) -> None:
         self._container[name] = entity
-    def get(self, name) -> Optional[T]:
+    def get(self, name: str) -> Optional[T]:
         return self._container.get(name, None)
 
 

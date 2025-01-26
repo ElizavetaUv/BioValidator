@@ -13,6 +13,7 @@ const PipelinesVersionSelector = ({
       value={value}
       onChange={(e) => onChange(e.target.value)}
       sx={{ height: 50, fontSize: "1.2rem" }}
+      label={label}
     >
       {pipelineVersions.map((version) => (
         <MenuItem key={version} value={version} sx={{ fontSize: "1.2rem" }}>

@@ -8,6 +8,7 @@ const theme = createTheme({
     },
   },
   typography: {
+    fontSize: 18,
     allVariants: {
       color: "#060D3A",
     },

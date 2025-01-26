@@ -16,7 +16,6 @@ const MetricsTable = ({ metrics }) => {
         acc[sampleName] = {
           sampleName,
           TP: 0,
-          TN: 0,
           FP: 0,
           FN: 0,
           precision: 0,
@@ -44,7 +43,7 @@ const MetricsTable = ({ metrics }) => {
         >
           <TableCell>Sample name</TableCell>
           <TableCell>True Positive variants</TableCell>
-          <TableCell>True Negative variants</TableCell>
+          <TableCell>False Negative variants</TableCell>
           <TableCell>False Positive variants</TableCell>
           <TableCell>Precision</TableCell>
           <TableCell>Recall</TableCell>
@@ -55,10 +54,14 @@ const MetricsTable = ({ metrics }) => {
           <TableRow key={index}>
             <TableCell>{row["sampleName"]}</TableCell>
             <TableCell>{row["tp-genes"] || 0}</TableCell>
-            <TableCell>{row["tn-genes"] || 0}</TableCell>
+            <TableCell>{row["fn-genes"] || 0}</TableCell>
             <TableCell>{row["fp-genes"] || 0}</TableCell>
-            <TableCell>{row["precision-gene"] || "N/A"}</TableCell>
-            <TableCell>{row["recall-gene"] || "N/A"}</TableCell>
+            <TableCell>
+              {parseFloat(row["precision-gene"]).toFixed(7) || "N/A"}
+            </TableCell>
+            <TableCell>
+              {parseFloat(row["recall-gene"]).toFixed(7) || "N/A"}
+            </TableCell>
           </TableRow>
         ))}
       </TableBody>

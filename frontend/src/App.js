@@ -13,6 +13,7 @@ import {
   startValidation,
   checkValidationStatus,
 } from "./api";
+import { enqueueSnackbar } from "notistack";
 
 const App = () => {
   const [samples, setSamples] = useState([]);
@@ -22,7 +23,6 @@ const App = () => {
   const [pipelineVersion, setPipelineVersion] = useState("");
   const [pipelineVersionToCompare, setPipelineVersionToCompare] = useState("");
   const [compareMetrics, setCompareMetrics] = useState(false);
-  const [validationPromiseId, setValidationPromiseId] = useState(null);
   const compareMetricsRef = useRef(compareMetrics);
 
   useEffect(() => {
@@ -49,13 +49,16 @@ const App = () => {
       );
     };
 
-    const intervalId = setInterval(fetchMetrics, 1000);
+    const intervalId = setInterval(fetchMetrics, 5000);
 
     return () => clearInterval(intervalId);
   }, [pipelineVersion, selectedSamples]);
 
   const handleSampleChange = (sample) => {
     if (compareMetrics) setCompareMetrics(false);
+    getMetrics(pipelineVersion, [...selectedSamples, sample]).then((data) =>
+      setMetrics(data)
+    );
     setSelectedSamples((prev) =>
       prev.includes(sample)
         ? prev.filter((s) => s !== sample)
@@ -76,9 +79,16 @@ const App = () => {
             console.log("Metrics are calculating");
             checkValidationStatus_(promiseId);
           } else if (data["status"] == "FAILURE") {
-            alert(`Error while calculating metrics: ${data["details"]}`);
+            enqueueSnackbar(
+              `Error while calculating metrics: ${data["details"]}`,
+              {
+                variant: "error",
+              }
+            );
           } else {
-            alert("Metrics calculation completed");
+            enqueueSnackbar("Metrics calculation completed", {
+              variant: "success",
+            });
           }
         });
       }, 5000);
@@ -98,6 +108,13 @@ const App = () => {
     };
 
     compareMetricsAPI(requestBody).then((data) => setMetrics(data));
+  };
+
+  const handleSetPipelineVersion = (pipelineVersionValue) => {
+    setPipelineVersion(pipelineVersionValue);
+    getMetrics(pipelineVersionValue, selectedSamples).then((data) =>
+      setMetrics(data)
+    );
   };
 
   return (
@@ -127,7 +144,7 @@ const App = () => {
 
             <PipelinesVersionSelector
               value={pipelineVersion}
-              onChange={setPipelineVersion}
+              onChange={handleSetPipelineVersion}
               pipelineVersions={["1", "2", "3"]}
               label="Pipeline version"
             />
@@ -135,7 +152,7 @@ const App = () => {
             <Button
               variant="contained"
               color="primary"
-              sx={{ height: 50, fontSize: "1.2rem" }}
+              sx={{ height: 50 }}
               fullWidth
               onClick={handleStartValidation}
             >
@@ -162,7 +179,6 @@ const App = () => {
                 <MetricsTable metrics={metrics} />
               )}
             </TableContainer>
-            {/* </Box> */}
 
             <ComparePipelineVersion
               pipelineVersionToCompare={pipelineVersionToCompare}

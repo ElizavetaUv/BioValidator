@@ -19,7 +19,6 @@ def extract_mutations_key(mutations: List[MutationCalculated]) -> Set[Tuple[Hash
     }
 
 
-# Must be run in worker
 class GermlineValidation(ValidationInterface):
     def __init__(
         self,
@@ -32,11 +31,6 @@ class GermlineValidation(ValidationInterface):
         self._input_maf = input_maf
 
     def validate(self) -> List[MetricCalculated]:
-        # TP и в референсе и в maf расчитанном находится мутация
-        # FN в референсе мутация есть, а в в в maf расчитанном нет
-        # FP в maf расчитанном есть мутация, а в референсе её нет
-        # recall
-        # precision
 
         calculated_mutations = [
             MutationCalculated(

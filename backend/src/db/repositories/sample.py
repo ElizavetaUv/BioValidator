@@ -23,7 +23,6 @@ class SampleRepository(BaseRepository):
         orm_sample = self.session.query(ORMSample).where(ORMSample.name == name).first()
         return orm_sample is not None
 
-    # TODO: Without references
     def get_all(self) -> List[SampleMetadata]:
         return [
             SampleMetadata(
