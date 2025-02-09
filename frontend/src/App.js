@@ -6,6 +6,7 @@ import CompareMetricsTable from "./components/CompareMetricsTable";
 import SampleList from "./components/SampleList";
 import PipelinesVersionSelector from "./components/PipelinesVersionSelector";
 import ComparePipelineVersion from "./components/ComparePipelinesVersion";
+import AddSampleDialog from "./components/AddSampleDialog";
 import {
   getMetrics,
   getSamples,
@@ -24,6 +25,7 @@ const App = () => {
   const [pipelineVersionToCompare, setPipelineVersionToCompare] = useState("");
   const [compareMetrics, setCompareMetrics] = useState(false);
   const compareMetricsRef = useRef(compareMetrics);
+  const [openDialog, setOpenDialog] = useState(false);
 
   useEffect(() => {
     compareMetricsRef.current = compareMetrics;
@@ -117,6 +119,11 @@ const App = () => {
     );
   };
 
+  const handleAddSampleDialogClose = () => {
+    setOpenDialog(false);
+    getSamples().then((data) => setSamples(data));
+  };
+
   return (
     <ThemeProviderWrapper>
       <Box
@@ -135,6 +142,14 @@ const App = () => {
             <Typography variant="h4" textAlign="center">
               Samples for validation
             </Typography>
+
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => setOpenDialog(true)}
+            >
+              Add new sample
+            </Button>
 
             <SampleList
               samples={samples}
@@ -189,6 +204,13 @@ const App = () => {
           </Stack>
         </Box>
       </Box>
+
+      <AddSampleDialog
+        open={openDialog}
+        onClose={handleAddSampleDialogClose}
+        setSamples={setSamples}
+        samples={samples}
+      />
     </ThemeProviderWrapper>
   );
 };

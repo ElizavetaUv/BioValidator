@@ -90,3 +90,101 @@ export const checkValidationStatus = (promiseId) => {
       return data;
     });
 };
+
+export const getReferences = () => {
+  return fetch(`${API_PATH}/references`, {
+    method: "GET",
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      console.log("References fetched:", data);
+      return data;
+    })
+    .catch((error) => {
+      console.error("Error fetching references:", error);
+    });
+};
+
+export const postReference = (newReferenceName) => {
+  return fetch(`${API_PATH}/references`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      name: newReferenceName,
+    }),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      return data;
+    });
+};
+
+export const calculateReferenceMutations = (referenceName, referenceFile) => {
+  const formData = new FormData();
+  formData.append("file", referenceFile);
+  formData.append("fileName", referenceFile.name);
+
+  return fetch(`${API_PATH}/references/${referenceName}/calculate/mutations`, {
+    method: "POST",
+    body: formData,
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      return data;
+    });
+};
+
+export const getReferenceCalculationMutationsStatus = (promiseId) => {
+  return fetch(
+    `${API_PATH}/references/calculate/mutations/${promiseId}/status`,
+    {
+      method: "GET",
+    }
+  )
+    .then((response) => response.json())
+    .then((data) => {
+      return data;
+    });
+};
+
+export const postSample = (newSampleName, selectedReference) => {
+  return fetch(`${API_PATH}/samples`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      name: newSampleName,
+      referenceName: selectedReference,
+    }),
+  })
+    .then((response) => {
+      if (response.ok) {
+        return undefined;
+      }
+      if (response.status === 409) {
+        return undefined;
+      }
+      return Promise.reject(response);
+    })
+    .then((data) => {
+      return data;
+    });
+};
+
+export const postSampleMutations = (sampleName, sampleFile) => {
+  const formData = new FormData();
+  formData.append("file", sampleFile);
+  formData.append("fileName", sampleFile.name);
+
+  return fetch(`${API_PATH}/samples/${sampleName}/molecular/mutations`, {
+    method: "POST",
+    body: formData,
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      return data;
+    });
+};

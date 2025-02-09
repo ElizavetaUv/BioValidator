@@ -5,7 +5,10 @@ Application for bioinformatic pipelines validation
 ### Deploying
 
 Deploy application:
-./scripts/build-all.sh
+
+```bash
+./scripts/deploy-all.sh
+```
 
 Build frontend/backend docker images:
 
