@@ -34,8 +34,8 @@ const CompareMetricsTable = ({ metrics }) => {
       }
 
       acc[sampleName][name] = {
-        currentValue: parseFloat(currentValue) || 0,
-        diffValue: parseFloat(diffValue) || 0,
+        currentValue: currentValue || 0,
+        diffValue: diffValue || 0,
       };
 
       return acc;
